@@ -1,0 +1,55 @@
+{
+  "name": "api-gateway-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Production-ready microservices API Gateway",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/api-gateway' --filter './apps/*-service' run dev",
+    "build": "pnpm --recursive run build",
+    "build:gateway": "pnpm --filter './apps/api-gateway' run build",
+    "build:services": "pnpm --filter './apps/*-service' run build",
+    "lint": "pnpm --recursive run lint",
+    "lint:fix": "pnpm --recursive run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yml,yaml}\" --ignore-path .prettierignore",
+    "test": "pnpm --recursive run test",
+    "test:coverage": "pnpm --recursive run test:coverage",
+    "typecheck": "pnpm --recursive run typecheck",
+    "clean": "pnpm --recursive run clean && rm -rf node_modules",
+    "docker:up": "docker-compose -f infrastructure/docker/docker-compose.yml up --build",
+    "docker:down": "docker-compose -f infrastructure/docker/docker-compose.yml down",
+    "docker:stop": "docker-compose -f infrastructure/docker/docker-compose.yml stop",
+    "docker:logs": "docker-compose -f infrastructure/docker/docker-compose.yml logs -f",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.0"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "**/*.{js,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  }
+}

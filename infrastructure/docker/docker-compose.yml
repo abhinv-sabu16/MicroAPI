@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - micro-network
+
+  auth-service:
+    build:
+      context: ../../
+      dockerfile: apps/auth-service/Dockerfile
+      target: development
+    ports:
+      - "5001:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ../../apps/auth-service:/app/apps/auth-service
+      - ../../packages/shared:/app/packages/shared
+    networks:
+      - micro-network
+
+  user-service:
+    build:
+      context: ../../
+      dockerfile: apps/user-service/Dockerfile
+      target: development
+    ports:
+      - "5002:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ../../apps/user-service:/app/apps/user-service
+      - ../../packages/shared:/app/packages/shared
+    networks:
+      - micro-network
+
+  notification-service:
+    build:
+      context: ../../
+      dockerfile: apps/notification-service/Dockerfile
+      target: development
+    ports:
+      - "5003:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ../../apps/notification-service:/app/apps/notification-service
+      - ../../packages/shared:/app/packages/shared
+    networks:
+      - micro-network
+
+  api-gateway:
+    build:
+      context: ../../
+      dockerfile: apps/api-gateway/Dockerfile
+      target: development
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - GATEWAY_PORT=5000
+      - GATEWAY_HOST=0.0.0.0
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - USER_SERVICE_URL=http://user-service:3000
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3000
+      - JWT_SECRET=dev-secret-at-least-thirty-two-characters-long
+    depends_on:
+      - redis
+      - auth-service
+      - user-service
+      - notification-service
+    volumes:
+      - ../../apps/api-gateway:/app/apps/api-gateway
+      - ../../packages/shared:/app/packages/shared
+    networks:
+      - micro-network
+
+networks:
+  micro-network:
+    driver: bridge
