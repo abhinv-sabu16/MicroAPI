@@ -24,6 +24,6 @@
   },
   "forwardPorts": [5000, 5001, 5002, 5003, 6379],
   "onCreateCommand": "corepack enable && corepack prepare pnpm@8.15.0 --activate && pnpm install",
-  "postCreateCommand": "chown -R node:node /app && corepack enable && corepack prepare pnpm@8.15.0 --activate && pnpm install"
+  "postCreateCommand": "chown -R node:node /app && corepack enable && corepack prepare pnpm@8.15.0 --activate && pnpm install",
   "remoteUser": "root"
 }
