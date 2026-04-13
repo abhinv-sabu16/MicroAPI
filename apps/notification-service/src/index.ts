@@ -1,19 +1,18 @@
-import fastify from 'fastify';
+// notification-service — stub. Kafka consumer wired: Day 11
+import Fastify from 'fastify';
 
-const server = fastify({ logger: true });
+const server = Fastify({ logger: { level: process.env['LOG_LEVEL'] ?? 'info' } });
 
-server.get('/health', async () => {
-  return { status: 'ok', service: 'notification-service' };
-});
+server.get('/health', async () => ({
+  status: 'ok',
+  service: 'notification-service',
+  timestamp: new Date().toISOString(),
+}));
 
-const start = async () => {
-  try {
-    const port = parseInt(process.env.PORT || '3000');
-    await server.listen({ port, host: '0.0.0.0' });
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-};
-
-start();
+try {
+  await server.listen({ port: 5003, host: '0.0.0.0' });
+  server.log.info('notification-service stub running on :5003');
+} catch (err) {
+  server.log.error(err);
+  process.exit(1);
+}

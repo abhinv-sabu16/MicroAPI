@@ -1,8 +1,6 @@
 {
   "name": "MicroAPI Monorepo",
-  "dockerComposeFile": "../infrastructure/docker/docker-compose.yml",
-  "service": "api-gateway",
-  "workspaceFolder": "/app",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
@@ -11,7 +9,19 @@
   },
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=2560",
-    "HUSKY": "0"
+    "HUSKY": "0",
+    "PNPM_HOME": "/usr/local/share/pnpm"
+  },
+  "onCreateCommand": "npm install -g pnpm@8.15.0 && pnpm install --child-concurrency 1",
+  "postCreateCommand": "pnpm --filter @repo/shared build && echo '✅ Codespace ready!'",
+  "forwardPorts": [80, 5000, 5001, 5002, 5003, 5432, 6379],
+  "portsAttributes": {
+    "5000": { "label": "API Gateway", "onAutoForward": "notify" },
+    "5001": { "label": "Auth Service", "onAutoForward": "silent" },
+    "5002": { "label": "User Service", "onAutoForward": "silent" },
+    "5003": { "label": "Notification Service", "onAutoForward": "silent" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+    "6379": { "label": "Redis", "onAutoForward": "silent" }
   },
   "customizations": {
     "vscode": {
@@ -19,12 +29,15 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker",
-        "mongodb.mongodb-vscode"
-      ]
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.preferences.importModuleSpecifier": "relative"
+      }
     }
   },
-  "forwardPorts": [5000, 5001, 5002, 5003, 6379, 27017],
-  "onCreateCommand": "corepack enable && pnpm install --child-concurrency 1 --prefer-offline",
-  "postCreateCommand": "pnpm --filter @repo/shared build && echo 'Codespace ready! Services are starting in the background.'",
   "remoteUser": "node"
 }

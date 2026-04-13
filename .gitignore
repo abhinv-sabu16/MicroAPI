@@ -1,1 +1,37 @@
-node_modules
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment — NEVER commit real secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Test coverage
+coverage/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Docker volumes
+.docker/
+
+# Kubernetes secrets
+infrastructure/k8s/**/*secret*.yml
+
+# Terraform
+infrastructure/terraform/*.tfstate
+infrastructure/terraform/.terraform/

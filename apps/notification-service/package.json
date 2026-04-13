@@ -1,18 +1,21 @@
 {
-  "name": "notification-service",
+  "name": "@repo/notification-service",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "description": "Notification microservice — Kafka consumer wired Day 11",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "lint": "eslint \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"Tests added Day 11\"",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
-    "fastify": "^4.0.0",
-    "@repo/shared": "workspace:*"
+    "@repo/shared": "workspace:*",
+    "fastify": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,18 +1,9 @@
-/**
- * Base application error — all custom errors extend this.
- * Preserves the original stack trace and adds HTTP semantics.
- */
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
   public readonly isOperational: boolean;
 
-  constructor(
-    message: string,
-    statusCode = 500,
-    code = 'INTERNAL_SERVER_ERROR',
-    isOperational = true,
-  ) {
+  constructor(message: string, statusCode = 500, code = 'INTERNAL_SERVER_ERROR', isOperational = true) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = this.constructor.name;
@@ -70,7 +61,6 @@ export class ServiceUnavailableError extends AppError {
   }
 }
 
-/** Type guard for operational errors (expected) vs programmer errors (bugs) */
 export function isOperationalError(error: unknown): error is AppError {
   return error instanceof AppError && error.isOperational;
 }

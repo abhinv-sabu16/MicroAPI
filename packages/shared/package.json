@@ -2,13 +2,34 @@
   "name": "@repo/shared",
   "version": "1.0.0",
   "private": true,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "description": "Shared utilities, types and error classes used across all services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./errors": {
+      "import": "./dist/errors/index.js",
+      "types": "./dist/errors/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc",
-    "lint": "eslint \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests in shared yet\"",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "zod": "^3.0.0"

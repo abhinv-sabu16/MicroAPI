@@ -1,19 +1,23 @@
-import fastify from 'fastify';
+// Auth Service — stub
+// Full JWT implementation: Day 4
+import Fastify from 'fastify';
 
-const server = fastify({ logger: true });
+const PORT = Number(process.env['AUTH_SERVICE_PORT'] ?? 5001);
 
-server.get('/health', async () => {
-  return { status: 'ok', service: 'auth-service' };
+const server = Fastify({
+  logger: { level: process.env['LOG_LEVEL'] ?? 'info' },
 });
 
-const start = async () => {
-  try {
-    const port = parseInt(process.env.PORT || '3000');
-    await server.listen({ port, host: '0.0.0.0' });
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-};
+server.get('/health', async () => ({
+  status: 'ok',
+  service: 'auth-service',
+  timestamp: new Date().toISOString(),
+}));
 
-start();
+try {
+  await server.listen({ port: PORT, host: '0.0.0.0' });
+  server.log.info(`Auth service stub running on :${PORT}`);
+} catch (err) {
+  server.log.error(err);
+  process.exit(1);
+}
