@@ -14,7 +14,7 @@ COPY packages/shared/package.json ./packages/shared/
 COPY apps/api-gateway/package.json ./apps/api-gateway/
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --child-concurrency 1
 
 # Copy source code
 COPY packages/shared ./packages/shared
@@ -33,7 +33,7 @@ WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
 COPY packages/shared ./packages/shared
 COPY apps/api-gateway ./apps/api-gateway
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --child-concurrency 1
 RUN pnpm --filter @repo/shared build
 RUN pnpm --filter api-gateway build
 
