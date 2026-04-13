@@ -1,41 +1,36 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const server_js_1 = require("./server.js");
-const env_js_1 = require("./config/env.js");
-const logger = { info: console.log, error: console.error }; // replaced by Pino Day 2
+import { buildServer } from './server.js';
+import { env } from './config/env.js';
 async function main() {
-    const server = await (0, server_js_1.buildServer)();
+    const server = await buildServer();
     try {
-        await server.listen({ port: env_js_1.env.GATEWAY_PORT, host: env_js_1.env.GATEWAY_HOST });
-        logger.info(`🚀 API Gateway running at http://${env_js_1.env.GATEWAY_HOST}:${env_js_1.env.GATEWAY_PORT}`);
-        logger.info(`📋 Environment: ${env_js_1.env.NODE_ENV}`);
+        await server.listen({ port: env.GATEWAY_PORT, host: env.GATEWAY_HOST });
+        server.log.info({ port: env.GATEWAY_PORT, host: env.GATEWAY_HOST, environment: env.NODE_ENV }, '🚀 API Gateway is ready');
     }
     catch (err) {
-        logger.error('Failed to start server:', err);
+        server.log.error({ err }, 'Failed to start server');
         process.exit(1);
     }
-    // ── Graceful shutdown ──────────────────────────────────────────────────
+    // Graceful shutdown — drains in-flight requests before exit
     const shutdown = async (signal) => {
-        logger.info(`Received ${signal} — shutting down gracefully...`);
+        server.log.info({ signal }, 'Shutdown signal received — draining requests...');
         try {
             await server.close();
-            logger.info('Server closed. Goodbye.');
+            server.log.info('All connections closed. Goodbye.');
             process.exit(0);
         }
         catch (err) {
-            logger.error('Error during shutdown:', err);
+            server.log.error({ err }, 'Error during graceful shutdown');
             process.exit(1);
         }
     };
     process.on('SIGTERM', () => void shutdown('SIGTERM'));
     process.on('SIGINT', () => void shutdown('SIGINT'));
-    // ── Unhandled rejection guard ──────────────────────────────────────────
     process.on('unhandledRejection', (reason, promise) => {
-        logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+        server.log.fatal({ reason, promise }, 'Unhandled promise rejection — exiting');
         process.exit(1);
     });
     process.on('uncaughtException', (error) => {
-        logger.error('Uncaught Exception:', error);
+        server.log.fatal({ err: error }, 'Uncaught exception — exiting');
         process.exit(1);
     });
 }

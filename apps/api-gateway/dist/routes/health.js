@@ -1,58 +1,97 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.healthRoutes = healthRoutes;
-const env_js_1 = require("../config/env.js");
-async function healthRoutes(server, _options) {
+import { env } from '../config/env.js';
+export async function healthRoutes(server, _options) {
     /**
-     * GET /health
-     * Basic liveness probe — just confirms the process is running.
-     * Kubernetes uses this: if it fails, the pod is restarted.
+     * GET /
+     * Basic landing info for the API Gateway.
      */
-    server.get('/health', {
+    server.get('/', {
         schema: {
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        status: { type: 'string', enum: ['ok', 'degraded', 'error'] },
-                        service: { type: 'string' },
-                        version: { type: 'string' },
-                        environment: { type: 'string' },
+                        message: { type: 'string' },
+                        status: { type: 'string' },
+                        health: { type: 'string' },
                         timestamp: { type: 'string' },
-                        uptime: { type: 'number' },
+                        requestId: { type: 'string' },
                     },
                 },
             },
         },
-    }, async (_request, reply) => {
+    }, async (request, reply) => {
+        return reply.code(200).send({
+            message: 'MicroAPI Gateway is running',
+            status: 'ok',
+            health: '/health',
+            timestamp: new Date().toISOString(),
+            requestId: request.requestId,
+        });
+    });
+    /**
+     * GET /health
+     * Liveness probe — confirms the process is alive.
+     * Kubernetes: restarts the pod if this returns non-2xx.
+     */
+    server.get('/health', {
+        schema: {},
+    }, async (request, reply) => {
         return reply.code(200).send({
             status: 'ok',
             service: 'api-gateway',
             version: process.env['npm_package_version'] ?? '1.0.0',
-            environment: env_js_1.env.NODE_ENV,
+            environment: env.NODE_ENV,
             timestamp: new Date().toISOString(),
             uptime: Math.floor(process.uptime()),
+            requestId: request.requestId,
         });
     });
     /**
      * GET /health/ready
      * Readiness probe — confirms the service is ready to accept traffic.
-     * Kubernetes uses this: if it fails, the pod is removed from the load balancer.
-     * Day 18 will add Redis + upstream service checks here.
+     * Day 8  -> adds Redis connectivity check
+     * Day 18 -> adds circuit breaker state check
      */
     server.get('/health/ready', {
         schema: {},
-    }, async (_request, reply) => {
-        // Placeholder — Day 18 adds real dependency checks (Redis, circuit breakers)
+    }, async (request, reply) => {
         const checks = {
-            redis: 'pending', // will be wired on Day 8
-            upstreamServices: 'pending', // will be wired on Day 18
+            redis: 'pending',
+            upstreamServices: 'pending',
         };
-        return reply.code(200).send({
-            status: 'ok',
+        const hasError = Object.values(checks).some((v) => v === 'error');
+        const status = hasError ? 'error' : 'ok';
+        const statusCode = hasError ? 503 : 200;
+        return reply.code(statusCode).send({
+            status,
             service: 'api-gateway',
             timestamp: new Date().toISOString(),
+            requestId: request.requestId,
             checks,
+        });
+    });
+    /**
+     * GET /health/metrics
+     * Quick Node.js process stats — not the Prometheus endpoint (Day 13).
+     */
+    server.get('/health/metrics', {
+        schema: {},
+    }, async (request, reply) => {
+        const mem = process.memoryUsage();
+        return reply.code(200).send({
+            requestId: request.requestId,
+            timestamp: new Date().toISOString(),
+            process: {
+                uptime: Math.floor(process.uptime()),
+                pid: process.pid,
+                nodeVersion: process.version,
+            },
+            memory: {
+                heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024),
+                heapTotalMb: Math.round(mem.heapTotal / 1024 / 1024),
+                rssMb: Math.round(mem.rss / 1024 / 1024),
+                externalMb: Math.round(mem.external / 1024 / 1024),
+            },
         });
     });
 }
