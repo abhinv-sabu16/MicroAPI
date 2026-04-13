@@ -22,8 +22,8 @@
       ]
     }
   },
-  "forwardPorts": [5000, 5001, 5002, 5003, 6379],
-  "onCreateCommand": "corepack enable && pnpm install",
-  "postCreateCommand": "echo 'Codespace ready! Run pnpm docker:up to start everything.'",
+  "forwardPorts": [5000, 5001, 5002, 5003, 6379, 27017],
+  "onCreateCommand": "corepack enable && corepack prepare pnpm@8.15.0 --activate && HUSKY=0 pnpm install --child-concurrency 1 && pnpm --filter @repo/shared build",
+  "postCreateCommand": "echo 'Codespace ready! Services are starting in the background. Use docker ps to check status.'",
   "remoteUser": "node"
 }

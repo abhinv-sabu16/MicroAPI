@@ -5,6 +5,25 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - micro-network
+
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - micro-network
 
@@ -71,12 +90,19 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:3000
       - USER_SERVICE_URL=http://user-service:3000
       - NOTIFICATION_SERVICE_URL=http://notification-service:3000
+      - MONGO_URL=mongodb://mongodb:27017/microapi
       - JWT_SECRET=dev-secret-at-least-thirty-two-characters-long
     depends_on:
-      - redis
-      - auth-service
-      - user-service
-      - notification-service
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
     volumes:
       - ../../apps/api-gateway:/app/apps/api-gateway
       - ../../packages/shared:/app/packages/shared
@@ -86,3 +112,6 @@ services:
 networks:
   micro-network:
     driver: bridge
+
+volumes:
+  mongodb-data:
