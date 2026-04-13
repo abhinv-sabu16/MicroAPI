@@ -7,10 +7,11 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
       "moby": true
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
     }
+  },
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=2560",
+    "HUSKY": "0"
   },
   "customizations": {
     "vscode": {
@@ -23,7 +24,7 @@
     }
   },
   "forwardPorts": [5000, 5001, 5002, 5003, 6379, 27017],
-  "onCreateCommand": "corepack enable && corepack prepare pnpm@8.15.0 --activate && HUSKY=0 pnpm install --child-concurrency 1 && pnpm --filter @repo/shared build",
-  "postCreateCommand": "echo 'Codespace ready! Services are starting in the background. Use docker ps to check status.'",
+  "onCreateCommand": "corepack enable && pnpm install --child-concurrency 1 --prefer-offline",
+  "postCreateCommand": "pnpm --filter @repo/shared build && echo 'Codespace ready! Services are starting in the background.'",
   "remoteUser": "node"
 }

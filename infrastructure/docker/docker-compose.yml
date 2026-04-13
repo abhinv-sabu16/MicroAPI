@@ -37,6 +37,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - NODE_OPTIONS=--max-old-space-size=512
     volumes:
       - ../../apps/auth-service:/app/apps/auth-service
       - ../../packages/shared:/app/packages/shared
@@ -53,6 +54,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - NODE_OPTIONS=--max-old-space-size=512
     volumes:
       - ../../apps/user-service:/app/apps/user-service
       - ../../packages/shared:/app/packages/shared
@@ -69,6 +71,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - NODE_OPTIONS=--max-old-space-size=512
     volumes:
       - ../../apps/notification-service:/app/apps/notification-service
       - ../../packages/shared:/app/packages/shared
@@ -92,6 +95,7 @@ services:
       - NOTIFICATION_SERVICE_URL=http://notification-service:3000
       - MONGO_URL=mongodb://mongodb:27017/microapi
       - JWT_SECRET=dev-secret-at-least-thirty-two-characters-long
+      - NODE_OPTIONS=--max-old-space-size=768
     depends_on:
       redis:
         condition: service_healthy
