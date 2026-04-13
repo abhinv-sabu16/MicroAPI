@@ -9,7 +9,7 @@ FROM base AS development
 WORKDIR /app
 
 # Copy configuration files
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/auth-service/package.json ./apps/auth-service/
 
@@ -30,7 +30,7 @@ CMD ["pnpm", "run", "dev"]
 # Production stage
 FROM base AS build
 WORKDIR /app
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
 COPY packages/shared ./packages/shared
 COPY apps/auth-service ./apps/auth-service
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
