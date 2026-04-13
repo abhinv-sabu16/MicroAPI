@@ -23,7 +23,7 @@
     }
   },
   "forwardPorts": [5000, 5001, 5002, 5003, 6379],
-  "onCreateCommand": "corepack enable && pnpm install",
+  "onCreateCommand": "corepack enable && corepack prepare pnpm@8.15.0 --activate && pnpm install",
   "postCreateCommand": "echo 'Codespace ready! Run pnpm docker:up to start everything.'",
   "remoteUser": "node"
 }
