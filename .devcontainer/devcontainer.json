@@ -1,26 +1,29 @@
 {
   "name": "MicroAPI Monorepo",
-
-  "dockerComposeFile": [
-    "../infrastructure/docker/docker-compose.yml"
-  ],
-
+  "dockerComposeFile": "../infrastructure/docker/docker-compose.yml",
   "service": "api-gateway",
-
   "workspaceFolder": "/app",
-
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"
     }
   },
-
-  "overrideCommand": false,
-
-  "remoteUser": "root",
-
-  "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
-
-  "forwardPorts": [5000, 5001, 5002, 5003, 6379]
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "mongodb.mongodb-vscode"
+      ]
+    }
+  },
+  "forwardPorts": [5000, 5001, 5002, 5003, 6379],
+  "onCreateCommand": "corepack enable && pnpm install",
+  "postCreateCommand": "echo 'Codespace ready! Run pnpm docker:up to start everything.'",
+  "remoteUser": "node"
 }
