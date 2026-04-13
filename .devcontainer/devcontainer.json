@@ -2,26 +2,25 @@
   "name": "MicroAPI Monorepo",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "moby": true
-    }
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=2560",
-    "HUSKY": "0",
-    "PNPM_HOME": "/usr/local/share/pnpm"
+    "HUSKY": "0"
   },
   "onCreateCommand": "npm install -g pnpm@8.15.0 && pnpm install --child-concurrency 1",
   "postCreateCommand": "pnpm --filter @repo/shared build && echo '✅ Codespace ready!'",
-  "forwardPorts": [80, 5000, 5001, 5002, 5003, 5432, 6379],
+  "forwardPorts": [5000, 5001, 5002, 5003, 5432, 6379],
   "portsAttributes": {
-    "5000": { "label": "API Gateway", "onAutoForward": "notify" },
-    "5001": { "label": "Auth Service", "onAutoForward": "silent" },
-    "5002": { "label": "User Service", "onAutoForward": "silent" },
-    "5003": { "label": "Notification Service", "onAutoForward": "silent" },
-    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
-    "6379": { "label": "Redis", "onAutoForward": "silent" }
+    "5000": { "label": "API Gateway",            "onAutoForward": "notify" },
+    "5001": { "label": "Auth Service",            "onAutoForward": "silent" },
+    "5002": { "label": "User Service",            "onAutoForward": "silent" },
+    "5003": { "label": "Notification Service",    "onAutoForward": "silent" },
+    "5432": { "label": "PostgreSQL",              "onAutoForward": "silent" },
+    "6379": { "label": "Redis",                   "onAutoForward": "silent" }
   },
   "customizations": {
     "vscode": {
@@ -29,8 +28,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker",
-        "Prisma.prisma",
-        "bradlc.vscode-tailwindcss"
+        "Prisma.prisma"
       ],
       "settings": {
         "editor.formatOnSave": true,
