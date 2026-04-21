@@ -5,10 +5,11 @@
     "NODE_OPTIONS": "--max-old-space-size=2560",
     "HUSKY": "0"
   },
-  "onCreateCommand": "npm install -g pnpm@8.15.0 && pnpm install --child-concurrency 1",
-  "postCreateCommand": "pnpm --filter @repo/shared build && echo '✅ Codespace ready! Run: pnpm dev'",
-  "forwardPorts": [5000, 5001, 5002, 5003, 5432, 6379],
+  "onCreateCommand": "bash .devcontainer/install-docker.sh && npm install -g pnpm@8.15.0 && pnpm install --child-concurrency 1",
+  "postCreateCommand": "pnpm --filter @repo/shared build && echo '✅ Codespace ready! Run: pnpm docker:up'",
+  "forwardPorts": [80, 5000, 5001, 5002, 5003, 5432, 6379],
   "portsAttributes": {
+    "80":   { "label": "Nginx",               "onAutoForward": "silent" },
     "5000": { "label": "API Gateway",         "onAutoForward": "notify" },
     "5001": { "label": "Auth Service",         "onAutoForward": "silent" },
     "5002": { "label": "User Service",         "onAutoForward": "silent" },

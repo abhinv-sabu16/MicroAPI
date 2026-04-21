@@ -22,11 +22,14 @@
     "test:coverage": "pnpm --recursive run test:coverage",
     "typecheck": "pnpm --recursive run typecheck",
     "clean": "pnpm --recursive run clean && rm -rf node_modules",
-    "docker:up": "docker-compose -f infrastructure/docker/docker-compose.yml up --build",
-    "docker:down": "docker-compose -f infrastructure/docker/docker-compose.yml down",
-    "docker:stop": "docker-compose -f infrastructure/docker/docker-compose.yml stop",
-    "docker:logs": "docker-compose -f infrastructure/docker/docker-compose.yml logs -f",
-    "prepare": "husky install"
+    "docker:up": "docker compose -f infrastructure/docker/docker-compose.yml up --build",
+    "docker:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
+    "docker:stop": "docker compose -f infrastructure/docker/docker-compose.yml stop",
+    "docker:logs": "docker compose -f infrastructure/docker/docker-compose.yml logs -f",
+    "prepare": "husky install",
+    "docker:rebuild": "docker compose -f infrastructure/docker/docker-compose.yml up --build --force-recreate",
+    "docker:ps": "docker compose -f infrastructure/docker/docker-compose.yml ps",
+    "docker:clean": "docker compose -f infrastructure/docker/docker-compose.yml down -v --remove-orphans"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
