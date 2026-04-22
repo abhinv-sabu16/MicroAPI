@@ -1,23 +1,34 @@
-// Auth Service — stub
-// Full JWT implementation: Day 4
-import Fastify from 'fastify';
+import { buildServer } from './server.js';
+import { env } from './config/env.js';
+import { closeRedis } from './utils/redis.js';
 
-const PORT = Number(process.env['AUTH_SERVICE_PORT'] ?? 5001);
+async function main(): Promise<void> {
+  const server = await buildServer();
 
-const server = Fastify({
-  logger: { level: process.env['LOG_LEVEL'] ?? 'info' },
-});
+  try {
+    await server.listen({ port: env.AUTH_SERVICE_PORT, host: '0.0.0.0' });
+    server.log.info(
+      { port: env.AUTH_SERVICE_PORT, env: env.NODE_ENV },
+      '🔐 Auth service ready',
+    );
+  } catch (err) {
+    server.log.error({ err }, 'Failed to start auth service');
+    process.exit(1);
+  }
 
-server.get('/health', async () => ({
-  status: 'ok',
-  service: 'auth-service',
-  timestamp: new Date().toISOString(),
-}));
+  const shutdown = async (signal: string): Promise<void> => {
+    server.log.info({ signal }, 'Shutting down...');
+    await server.close();
+    await closeRedis();
+    process.exit(0);
+  };
 
-try {
-  await server.listen({ port: PORT, host: '0.0.0.0' });
-  server.log.info(`Auth service stub running on :${PORT}`);
-} catch (err) {
-  server.log.error(err);
-  process.exit(1);
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT',  () => void shutdown('SIGINT'));
+  process.on('unhandledRejection', (reason) => {
+    server.log.fatal({ reason }, 'Unhandled rejection');
+    process.exit(1);
+  });
 }
+
+void main();
