@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 import { env } from '../config/env.js';
 
@@ -18,17 +18,11 @@ export function getRedis(): Redis {
     });
 
     client.on('error', (err: Error) => {
-      // Log but don't crash — auth still works without Redis in dev
-      // (refresh token revocation is skipped when Redis is unavailable)
       console.warn('[redis] connection error:', err.message);
     });
   }
   return client;
 }
-
-// ── Refresh token revocation store ────────────────────────────────────────
-// Key pattern: refresh_token:{jti} → userId
-// TTL matches the refresh token expiry so Redis auto-cleans
 
 const PREFIX = 'refresh_token:';
 
@@ -47,10 +41,8 @@ export async function storeRefreshToken(
 export async function isRefreshTokenRevoked(jti: string): Promise<boolean> {
   try {
     const value = await getRedis().get(`${PREFIX}${jti}`);
-    // Token is valid if it EXISTS in Redis (we store active tokens)
     return value === null;
   } catch {
-    // If Redis is down, allow the token (fail open in dev)
     console.warn('[redis] isRefreshTokenRevoked failed — allowing token');
     return false;
   }
