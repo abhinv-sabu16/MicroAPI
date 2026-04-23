@@ -1,23 +1,22 @@
 /**
  * Plugin registration barrel.
  *
- * ORDER MATTERS in Fastify — plugins decorate the instance in sequence.
- * The dependency graph here is:
+ * Order is critical in Fastify — each plugin decorates the instance
+ * for the ones that follow it.
  *
- *   sensible       (no deps — pure decorators)
- *     ↓
- *   helmet         (no deps — sets response headers)
- *     ↓
- *   cors           (no deps — sets response headers)
- *     ↓
- *   requestContext (depends on: Fastify's genReqId being set)
+ *   sensible        → HTTP error helpers (no deps)
+ *   helmet          → security headers (no deps)
+ *   cors            → CORS policy (no deps)
+ *   requestContext  → requestId + timing (no deps)
+ *   jwt             → authenticate/requireRole decorators (needs requestContext)
  *
- * Future plugins added here:
- *   Day 8  → rateLimit  (depends on: Redis client)
- *   Day 13 → metrics    (depends on: Prometheus client)
- *   Day 15 → tracing    (depends on: OpenTelemetry SDK)
+ * Future:
+ *   Day 8  → rateLimit  (needs Redis)
+ *   Day 13 → metrics    (needs Prometheus)
+ *   Day 15 → tracing    (needs OpenTelemetry)
  */
-export { sensiblePlugin } from './sensible.js';
-export { helmetPlugin } from './helmet.js';
-export { corsPlugin } from './cors.js';
+export { sensiblePlugin }       from './sensible.js';
+export { helmetPlugin }         from './helmet.js';
+export { corsPlugin }           from './cors.js';
 export { requestContextPlugin } from './request-context.js';
+export { jwtPlugin }            from './jwt.js';
