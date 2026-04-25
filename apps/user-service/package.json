@@ -3,23 +3,40 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "User CRUD microservice with Postgres/Prisma — full implementation Day 6",
+  "description": "User management microservice — CRUD with Postgres/Prisma",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"Tests added Day 6\"",
-    "clean": "rm -rf dist"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "clean": "rm -rf dist coverage"
   },
   "dependencies": {
+    "@prisma/client": "^5.10.0",
     "@repo/shared": "workspace:*",
-    "fastify": "^4.0.0"
+    "bcryptjs": "^2.4.3",
+    "fastify": "^4.0.0",
+    "@fastify/sensible": "^5.6.0",
+    "ioredis": "^5.3.2",
+    "pino-pretty": "^11.3.0",
+    "zod": "^3.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "prisma": "^5.10.0",
+    "tsx": "^4.7.1",
     "typescript": "^5.4.0",
-    "tsx": "^4.7.1"
+    "vitest": "^1.6.1"
   }
 }
