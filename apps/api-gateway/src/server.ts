@@ -5,6 +5,7 @@ import {
   corsPlugin,
   helmetPlugin,
   jwtPlugin,
+  proxyPlugin,
   requestContextPlugin,
   sensiblePlugin,
 } from './plugins/index.js';
@@ -33,11 +34,12 @@ export async function buildServer(): Promise<FastifyInstance> {
   await server.register(helmetPlugin);
   await server.register(corsPlugin);
   await server.register(requestContextPlugin);
-  await server.register(jwtPlugin);          // Day 5 — JWT auth decorators
+  await server.register(jwtPlugin);
+  await server.register(proxyPlugin);          // Day 7 — upstream proxy routing
 
-  // ── Routes ────────────────────────────────────────────────────────────
+  // ── Gateway-level routes (not proxied) ────────────────────────────────
   await server.register(healthRoutes);
-  await server.register(protectedRoutes);    // Day 5 — protected route examples
+  await server.register(protectedRoutes);      // Day 5 example routes
 
   // ── 404 ───────────────────────────────────────────────────────────────
   server.setNotFoundHandler((request, reply) => {
