@@ -1,13 +1,13 @@
-# docker-compose.yml — Local Development Stack
+# infrastructure/docker/docker-compose.yml
+# Full local development stack with Nginx reverse proxy.
 # Usage:
 #   docker compose -f infrastructure/docker/docker-compose.yml up --build
-#   docker compose -f infrastructure/docker/docker-compose.yml down -v
 
 version: "3.9"
 
 x-common-env: &common-env
   NODE_ENV: development
-  LOG_LEVEL: ${LOG_LEVEL:-info}
+  LOG_LEVEL: info
 
 x-service-defaults: &service-defaults
   restart: unless-stopped
@@ -27,7 +27,7 @@ networks:
 
 services:
 
-  # ── PostgreSQL ──────────────────────────────────────────────────────────
+  # ── PostgreSQL ─────────────────────────────────────────────────────────
   postgres:
     <<: *service-defaults
     image: postgres:16-alpine
@@ -49,7 +49,7 @@ services:
       retries: 5
       start_period: 10s
 
-  # ── Redis ───────────────────────────────────────────────────────────────
+  # ── Redis ──────────────────────────────────────────────────────────────
   redis:
     <<: *service-defaults
     image: redis:7-alpine
@@ -69,7 +69,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── API Gateway ─────────────────────────────────────────────────────────
+  # ── API Gateway ────────────────────────────────────────────────────────
   api-gateway:
     <<: *service-defaults
     container_name: gateway_api
@@ -92,7 +92,7 @@ services:
       RATE_LIMIT_MAX:           ${RATE_LIMIT_MAX:-100}
       RATE_LIMIT_WINDOW_MS:     ${RATE_LIMIT_WINDOW_MS:-60000}
     ports:
-      - "${GATEWAY_PORT:-5000}:5000"
+      - "${GATEWAY_PORT:-5000}:5000"   # direct access for debugging
     depends_on:
       redis:
         condition: service_healthy
@@ -103,9 +103,9 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 25s
+      start_period: 20s
 
-  # ── Auth Service ────────────────────────────────────────────────────────
+  # ── Auth Service ───────────────────────────────────────────────────────
   auth-service:
     <<: *service-defaults
     container_name: gateway_auth
@@ -131,9 +131,9 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 25s
+      start_period: 20s
 
-  # ── User Service ────────────────────────────────────────────────────────
+  # ── User Service ───────────────────────────────────────────────────────
   user-service:
     <<: *service-defaults
     container_name: gateway_user
@@ -144,7 +144,7 @@ services:
     environment:
       <<: *common-env
       USER_SERVICE_PORT: 5002
-      DATABASE_URL:      postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-gateway_db}
+      DATABASE_URL:      ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/gateway_db}
       REDIS_URL:         redis://redis:6379
     ports:
       - "${USER_SERVICE_PORT:-5002}:5002"
@@ -158,7 +158,7 @@ services:
       retries: 3
       start_period: 25s
 
-  # ── Notification Service ────────────────────────────────────────────────
+  # ── Notification Service ───────────────────────────────────────────────
   notification-service:
     <<: *service-defaults
     container_name: gateway_notification
@@ -172,15 +172,32 @@ services:
     ports:
       - "${NOTIFICATION_SERVICE_PORT:-5003}:5003"
 
-  # ── Nginx (minimal — full config Day 10) ───────────────────────────────
+  # ── Nginx Reverse Proxy ────────────────────────────────────────────────
   nginx:
     <<: *service-defaults
     image: nginx:1.25-alpine
     container_name: gateway_nginx
     volumes:
       - ../nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
     ports:
       - "${NGINX_PORT:-80}:80"
+      - "${NGINX_SSL_PORT:-443}:443"
     depends_on:
       api-gateway:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/nginx-health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  volumes:
+  postgres-data:
+    name: gateway_postgres_data
+  redis-data:
+    name: gateway_redis_data
+  nginx-logs:
+    name: gateway_nginx_logs 
